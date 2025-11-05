@@ -1,6 +1,10 @@
 ﻿#include <stdarg.h>
 #include "../include/vga.h"
 
+#define VGA_WIDTH  80
+#define VGA_HEIGHT 25
+#define VGA_ADDRESS 0xB8000
+
 static volatile uint16_t* const VGA_MEMORY = (volatile uint16_t*)VGA_ADDRESS;
 uint8_t color = 0x0F;
 
@@ -20,52 +24,15 @@ void scroll() {
 	}
 }
 
-void vga_putc(char c) {
-	if (c == '\n') {
-		uint16_t position = VGA_GetCursorPosition();
-		int row = position / VGA_WIDTH;
-		if (row >= VGA_HEIGHT - 1) {
-			scroll();
-			row = VGA_HEIGHT - 2;
-		}
-		VGA_SetCursor(0, row + 1);
-		return;
-	}
-	if (c == '\t') {
-		uint16_t position = VGA_GetCursorPosition();
-		for (int i = 0; i <= 4; i++) {
-			vga_putc(' ');
-		}
-		return;
-	}
-	if (c == '\b') {
-		uint16_t position = VGA_GetCursorPosition();
-		VGA_SetCursor((position - 1) % VGA_WIDTH, (position - 1) / VGA_WIDTH);
-		VGA_MEMORY[position] = (uint16_t)' ' | (0x0A << 8);
-		return;
-	}
-	uint16_t position = VGA_GetCursorPosition();
-	VGA_MEMORY[position] = (uint16_t)c | (color << 8);
-
-	// حرکت کرسر به جلو
-	uint16_t new_position = position + 1;
-	VGA_SetCursor(new_position % VGA_WIDTH, new_position / VGA_WIDTH);
-
-	// بررسی اسکرول
-	uint16_t newPos = VGA_GetCursorPosition();
-	if ((newPos / VGA_WIDTH) >= VGA_HEIGHT) {
-		scroll();
-	}
-}
-
 void kprint(const char* str) {
 	if (strcmp(str, "\033[2k") == 0) {
 		rmline();
 		return;
 	}
 
-	for (int i = 0; i < strlen(str); i++) {
-		vga_putc(str[i]);
+	// بهینه‌سازی: حذف فراخوانی strlen اضافی
+	while (*str) {
+		VGA_Putc(*str++);
 	}
 }
 
@@ -74,18 +41,56 @@ void kprint_num(int num) {
 	int i = 0;
 	int is_negative = 0;
 
+	// حالت ویژه برای کوچکترین عدد
+	if (num == -2147483648) {
+		kprint("-2147483648");
+		return;
+	}
+
 	if (num < 0) {
 		is_negative = 1;
 		num = -num;
 	}
 
-	do {
-		buf[i++] = '0' + (num % 10);
-		num /= 10;
-	} while (num > 0 && i < 15);
+	// حالت صفر
+	if (num == 0) {
+		buf[i++] = '0';
+	}
+	else {
+		while (num > 0 && i < 15) {
+			buf[i++] = '0' + (num % 10);
+			num /= 10;
+		}
+	}
 
 	if (is_negative) {
 		buf[i++] = '-';
+	}
+
+	buf[i] = '\0';
+
+	// معکوس کردن رشته
+	for (int j = 0, k = i - 1; j < k; j++, k--) {
+		char temp = buf[j];
+		buf[j] = buf[k];
+		buf[k] = temp;
+	}
+
+	kprint(buf);
+}
+
+void kprint_unsigned(unsigned int num) {
+	char buf[16];
+	int i = 0;
+
+	if (num == 0) {
+		buf[i++] = '0';
+	}
+	else {
+		while (num > 0 && i < 15) {
+			buf[i++] = '0' + (num % 10);
+			num /= 10;
+		}
 	}
 
 	buf[i] = '\0';
@@ -119,7 +124,7 @@ void kprintf(const char* format, ...) {
 			}
 			case 'c': {
 				char c = va_arg(args, int);
-				vga_putc(c);
+				VGA_Putc(c);
 				break;
 			}
 			case 'x': {
@@ -159,7 +164,7 @@ void kprintf(const char* format, ...) {
 				int int_part = (int)num;
 				double fractional_part = num - int_part;
 				kprint_num(int_part);
-				vga_putc('.');
+				VGA_Putc('.');
 				for (int i = 0; i < 6; i++) {
 					fractional_part *= 10;
 					int digit = (int)fractional_part;
@@ -199,17 +204,17 @@ void kprintf(const char* format, ...) {
 			}
 			case 'u': {
 				unsigned int num = va_arg(args, unsigned int);
-				kprint_num(num);
+				kprint_unsigned(num); 
 				break;
 			}
 			default:
-				vga_putc('%');
-				vga_putc(*p);
+				VGA_Putc('%');
+				VGA_Putc(*p);
 				break;
 			}
 		}
 		else {
-			vga_putc(*p);
+			VGA_Putc(*p);
 		}
 	}
 
@@ -228,7 +233,7 @@ void rmline() {
 	VGA_GetCursor(&x, &y);
 	VGA_SetCursor(0, y);
 	for (int i = 0; i < VGA_WIDTH; i++) {
-		vga_putc(' ');
+		VGA_Putc(' ');
 	}
 	VGA_SetCursor(0, y);
 }
@@ -251,6 +256,55 @@ void VGA_Clear()
 	for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++)
 	{
 		VGA_MEMORY[i] = ClearValue;
+	}
+}
+
+void VGA_Putc(char c) {
+	uint16_t position = VGA_GetCursorPosition();
+
+	// بررسی overflow - یک بار کافی است
+	if (position >= VGA_WIDTH * VGA_HEIGHT) {
+		scroll();
+		position = VGA_GetCursorPosition();
+	}
+
+	if (c == '\n') {
+		int row = position / VGA_WIDTH;
+		if (row >= VGA_HEIGHT - 1) {
+			scroll();
+			row = VGA_HEIGHT - 2;
+		}
+		VGA_SetCursor(0, row + 1);
+		return;
+	}
+
+	if (c == '\t') {
+		// تب ۴ فضای خالی ایجاد می‌کند (نه ۵ تا)
+		for (int i = 0; i < 4; i++) {
+			VGA_Putc(' ');
+		}
+		return;
+	}
+
+	if (c == '\b') {
+		if (position > 0) {
+			position--;
+			VGA_SetCursor(position % VGA_WIDTH, position / VGA_WIDTH);
+			VGA_MEMORY[position] = (uint16_t)' ' | (color << 8);
+		}
+		return;
+	}
+
+	// نوشتن کاراکتر عادی
+	VGA_MEMORY[position] = (uint16_t)c | (color << 8);
+
+	// حرکت کرسر
+	position++;
+	VGA_SetCursor(position % VGA_WIDTH, position / VGA_WIDTH);
+
+	// بررسی اسکرول فقط اگر نیاز باشد
+	if (position >= VGA_WIDTH * VGA_HEIGHT) {
+		scroll();
 	}
 }
 

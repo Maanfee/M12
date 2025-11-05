@@ -8,9 +8,6 @@
 **M12** is a modern, from-scratch x86-64 operating system written in C. The project follows a microkernel architecture and demonstrates low-level systems programming concepts including bootloading, memory management, and hardware interaction.
 
 <!--
-## Symbolic Link
-ln -s /mnt/c/Users/gordon/Desktop/Projects/M12 ~/m12
-
 ## 🏗️ Project Structure
 src/
 |
@@ -52,6 +49,15 @@ src/
 -->
 
 ## 🎯 Architecture Vision
+<!--
+┌─────────────────┐
+│   User Space    │ ← Processes & Services
+├─────────────────┤
+│  System Calls   │ ← POSIX Interface
+├─────────────────┤
+│  Microkernel    │ ← IPC, Scheduling, MM
+└─────────────────┘
+-->
 
 ### 🏗️ Microkernel Design (In Development)
 **M12** is being developed as a **microkernel** with the following design principles:
@@ -85,9 +91,34 @@ src/
 - GNU Make
 - QEMU (for emulation)
 
+### Installation Setup
+```bash
+# Update Ubuntu/Debian
+sudo apt update && sudo apt upgrade -y
+```
+```bash
+# Install build dependencies Ubuntu/Debian
+sudo apt-get install -y build-essential
+sudo apt-get install -y gcc-x86-64-linux-gnu
+sudo apt-get install -y nasm
+sudo apt-get install -y binutils
+sudo apt-get install -y make
+sudo apt-get install -y qemu-system-x86
+sudo apt-get install -y gdb
+```
+### Symbolic Link (For WSL Users)
+Create symbolic link for WSL (adjust path as needed)
+```bash
+# Symbolic Link Ubuntu/Debian
+ln -s /mnt/<Windows Path>/M12 ~/m12
+```
+<!--
+ln -s /mnt/c/Users/gordon/Desktop/Projects/M12 ~/m12
+-->
+
 ### Build Instructions
 ```bash
-# Build and Run
+# Build the OS image and Run
 make
 
 # Run in QEMU
@@ -96,5 +127,5 @@ make run
 # Debug with QEMU and GDB
 make debug
 
-# Clean files
+# Clean all generated files including OS image
 make clean

@@ -7,6 +7,8 @@ void _kmain() {
 	Init_VGA();
 	OS;
 
+	VGA_DEBUG("VGA initialized successfully");
+
 	// =============================================================
 	//int number = 10;    
 	//int* ptr;          

@@ -3,10 +3,6 @@
 
 #include "common.h"
 
-#define VGA_WIDTH  80
-#define VGA_HEIGHT 25
-#define VGA_ADDRESS 0xB8000
-
 typedef enum Color {
     BLACK         = 0x0,
     BLUE          = 0x1,
@@ -28,7 +24,6 @@ typedef enum Color {
 
 extern uint8_t color;
 
-void vga_putc(char c);
 void set_color(Color new_color);
 void kprintcolor(const char* str, Color new);
 void rmline();
@@ -40,5 +35,12 @@ void VGA_GetCursor(int* x, int* y);
 void VGA_SetCursor(int x, int y);
 uint16_t VGA_GetCursorPosition();
 void SetColor(Color new_color);
+void VGA_Putc(char c);
+
+#ifdef DEBUG
+#define VGA_DEBUG(msg) kprintf("[DEBUG] %s\n", msg)
+#else
+#define VGA_DEBUG(msg)
+#endif
 
 #endif
