@@ -17,16 +17,27 @@ boot.bin:
 	cd boot && $(AS) -f bin -o ../boot.bin boot.asm
 
 ############################################
+ALLOBJS = $(shell find . -name "*.o" -type f)
 
-#SRCS = kernel/main.c kernel/vga.c lib/string.c
-SRCS = $(shell find . -name "*.c" -type f)
+SRCS = kernel/main.c kernel/vga.c kernel/idt.c kernel/isr.c kernel/irq.c kernel/syscall.c \
+			kernel/memory.c	kernel/paging.c		lib/string.c
+#SRCS = $(shell find . -name "*.c" -type f)
 OBJS = $(SRCS:.c=.o)
 
 %.o: %.c
+	@echo "Compiling: $<"
 	$(CC) $(CFLAGS) -o $@ $<
 
-Kernel.bin: $(OBJS)
-	$(LD) $(LDFLAGS) $^ -o $@
+ASMSRCS = kernel/isr_.asm kernel/irq_.asm kernel/syscall_.asm
+ASMOBJS = $(ASMSRCS:.asm=.o)
+
+%.o: %.asm
+	@echo "Assembling: isr.asm $<"
+	$(AS) -f elf64 -o $@ $<
+
+Kernel.bin: $(OBJS) $(ASMOBJS) 
+	@echo "Linking kernel..."
+	$(LD) $(LDFLAGS) $(OBJS) $(ASMOBJS) -o $@
 
 ############################################
 
@@ -47,5 +58,5 @@ debug: disk.img
 
 clean:
 	@echo "Cleaning up..."
-	rm -f $(OBJS) *.bin disk.img qemu.log
+	rm -f $(ALLOBJS) *.bin disk.img qemu.log
 	@echo "Clean completed!"

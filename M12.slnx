@@ -9,13 +9,28 @@
   <Folder Name="/include/">
     <File Path="include/asm.h" />
     <File Path="include/common.h" />
+    <File Path="include/idt.h" />
+    <File Path="include/irq.h" />
+    <File Path="include/isr.h" />
     <File Path="include/kernel.h" />
+    <File Path="include/memory.h" />
+    <File Path="include/paging.h" />
+    <File Path="include/syscall.h" />
     <File Path="include/type.h" />
     <File Path="include/vga.h" />
   </Folder>
   <Folder Name="/Kernel/">
+    <File Path="kernel/idt.c" />
+    <File Path="kernel/irq.c" />
+    <File Path="kernel/irq_.asm" />
+    <File Path="kernel/isr.c" />
+    <File Path="kernel/isr_.asm" />
     <File Path="kernel/kernel.ld" />
     <File Path="kernel/main.c" />
+    <File Path="kernel/memory.c" />
+    <File Path="kernel/paging.c" />
+    <File Path="kernel/syscall.c" />
+    <File Path="kernel/syscall_.asm" />
     <File Path="kernel/vga.c" />
   </Folder>
   <Folder Name="/lib/">

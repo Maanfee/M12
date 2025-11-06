@@ -25,7 +25,7 @@ typedef enum Color {
 extern uint8_t color;
 
 void set_color(Color new_color);
-void kprintcolor(const char* str, Color new);
+void kprintcolor(Color new, const char* format, ...);
 void rmline();
 
 void Init_VGA();
@@ -36,11 +36,5 @@ void VGA_SetCursor(int x, int y);
 uint16_t VGA_GetCursorPosition();
 void SetColor(Color new_color);
 void VGA_Putc(char c);
-
-#ifdef DEBUG
-#define VGA_DEBUG(msg) kprintf("[DEBUG] %s\n", msg)
-#else
-#define VGA_DEBUG(msg)
-#endif
 
 #endif

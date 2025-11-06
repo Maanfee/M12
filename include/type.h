@@ -1,4 +1,4 @@
-#ifndef TYPE_H
+﻿#ifndef TYPE_H
 #define TYPE_H
 
 typedef char int8_t;
@@ -12,6 +12,9 @@ typedef unsigned int uint32_t;
 
 typedef long long int64_t;
 typedef unsigned long long uint64_t;
+
+// size_t برای سیستم عامل 64 بیتی
+typedef uint64_t size_t; 
 
 #define NULL ((void*)0)
 

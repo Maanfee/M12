@@ -1,5 +1,6 @@
 ﻿#include <stdarg.h>
 #include "../include/vga.h"
+#include "../include/common.h"
 
 #define VGA_WIDTH  80
 #define VGA_HEIGHT 25
@@ -104,10 +105,7 @@ void kprint_unsigned(unsigned int num) {
 	kprint(buf);
 }
 
-void kprintf(const char* format, ...) {
-	va_list args;
-	va_start(args, format);
-
+void vkprintf(const char* format, va_list args) {
 	for (const char* p = format; *p != '\0'; p++) {
 		if (*p == '%') {
 			p++;
@@ -128,85 +126,30 @@ void kprintf(const char* format, ...) {
 				break;
 			}
 			case 'x': {
-				int num = va_arg(args, int);
-				char buf[16];
-				int i = 0;
-				int is_negative = 0;
-
-				if (num < 0) {
-					is_negative = 1;
-					num = -num;
-				}
-
-				do {
-					int digit = num % 16;
-					buf[i++] = digit < 10 ? '0' + digit : 'A' + digit - 10;
-					num /= 16;
-				} while (num > 0 && i < 15);
-
-				if (is_negative) {
-					buf[i++] = '-';
-				}
-
-				buf[i] = '\0';
-
-				for (int j = 0, k = i - 1; j < k; j++, k--) {
-					char temp = buf[j];
-					buf[j] = buf[k];
-					buf[k] = temp;
-				}
-
-				kprint(buf);
-				break;
-			}
-			case 'f': {
-				double num = va_arg(args, double);
-				int int_part = (int)num;
-				double fractional_part = num - int_part;
-				kprint_num(int_part);
-				VGA_Putc('.');
-				for (int i = 0; i < 6; i++) {
-					fractional_part *= 10;
-					int digit = (int)fractional_part;
-					kprint_num(digit);
-					fractional_part -= digit;
-				}
-				break;
-			}
-			case 'p': {
-				void* ptr = va_arg(args, void*);
-				kprint("0x");
-				uint64_t num = (uint64_t)ptr;  // استفاده از uint64_t به جای int
-				char buf[16];
-				int i = 0;
+				uint64_t num = va_arg(args, uint64_t);
+				char hex_buf[20];
+				char* p = hex_buf + sizeof(hex_buf) - 1;
+				*p = '\0';
 
 				if (num == 0) {
-					buf[i++] = '0';
+					*(--p) = '0';
 				}
 				else {
-					while (num > 0 && i < 15) {
-						int digit = num % 16;
-						buf[i++] = digit < 10 ? '0' + digit : 'A' + digit - 10;
-						num /= 16;
+					while (num > 0) {
+						int digit = num & 0xF;
+						*(--p) = (digit < 10) ? ('0' + digit) : ('a' + digit - 10);
+						num >>= 4;
 					}
 				}
-
-				buf[i] = '\0';
-
-				for (int j = 0, k = i - 1; j < k; j++, k--) {
-					char temp = buf[j];
-					buf[j] = buf[k];
-					buf[k] = temp;
-				}
-
-				kprint(buf);
+				kprint(p);
 				break;
 			}
 			case 'u': {
 				unsigned int num = va_arg(args, unsigned int);
-				kprint_unsigned(num); 
+				kprint_unsigned(num);
 				break;
 			}
+					// سایر caseها...
 			default:
 				VGA_Putc('%');
 				VGA_Putc(*p);
@@ -217,14 +160,24 @@ void kprintf(const char* format, ...) {
 			VGA_Putc(*p);
 		}
 	}
+}
 
+void kprintf(const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	vkprintf(format, args);
 	va_end(args);
 }
 
-void kprintcolor(const char* str, Color new) {
+void kprintcolor(Color new, const char* format, ...) {
 	Color temp = color;
 	SetColor(new);
-	kprint(str);
+
+	va_list args;
+	va_start(args, format);
+	vkprintf(format, args);
+	va_end(args);
+
 	SetColor(temp);
 }
 
@@ -403,4 +356,5 @@ void Init_VGA()
 	SetColor(LIGHT_GREEN);
 	VGA_EnableCursor();
 	VGA_SetCursor(0, 0);
+	DEBUGER(LIGHT_RED, "VGA initialized successfully");
 }

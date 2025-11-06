@@ -1,12 +1,15 @@
-#ifndef DEFINITIONS_H
+﻿#ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
 #include "asm.h"
 #include "type.h"
+#include "vga.h"
+#include "kernel.h"
 
 int strlen(const char* str);
 void kprint(const char* str);
 void kprintf(const char* format, ...);
+
 void* memcpy(void* dest, const void* src, uint32_t n);
 void* memset(void* dest, int c, uint32_t n);
 void* memmove(void* dest, const void* src, uint32_t n);
