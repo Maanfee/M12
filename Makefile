@@ -20,7 +20,7 @@ boot.bin:
 ALLOBJS = $(shell find . -name "*.o" -type f)
 
 SRCS = kernel/main.c kernel/vga.c kernel/idt.c kernel/isr.c kernel/irq.c kernel/syscall.c \
-			kernel/memory.c	kernel/paging.c		lib/string.c
+			kernel/memory.c	kernel/paging.c	kernel/test.c	lib/string.c
 #SRCS = $(shell find . -name "*.c" -type f)
 OBJS = $(SRCS:.c=.o)
 
@@ -50,11 +50,11 @@ disk.img: boot.bin Kernel.bin
 
 run: disk.img
 	@echo "Starting QEMU..."
-	qemu-system-x86_64 -drive file=disk.img,format=raw,index=0,media=disk -no-reboot
+	qemu-system-x86_64 -drive file=disk.img,format=raw,index=0,media=disk -m 256M -no-reboot
 
 debug: disk.img
 	@echo "Starting QEMU in debug mode..."
-	qemu-system-x86_64 -drive file=disk.img,format=raw,index=0,media=disk -d cpu_reset -D qemu.log -s -S
+#	qemu-system-x86_64 -drive file=disk.img,format=raw,index=0,media=disk -d cpu_reset -D qemu.log -s -S
 
 clean:
 	@echo "Cleaning up..."

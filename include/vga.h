@@ -18,7 +18,7 @@ typedef enum Color {
     LIGHT_CYAN    = 0xB,
     LIGHT_RED     = 0xC,
     LIGHT_MAGENTA = 0xD,
-    LIGHT_BROWN   = 0xE,
+    LIGHT_YELLOW  = 0xE,
     WHITE         = 0xF
 } Color;
 

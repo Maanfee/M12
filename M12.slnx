@@ -4,6 +4,7 @@
     <File Path="boot/disk.asm" />
     <File Path="boot/gdt32.asm" />
     <File Path="boot/gdt64.asm" />
+    <File Path="boot/memory.asm" />
     <File Path="boot/pmode.asm" />
   </Folder>
   <Folder Name="/include/">
@@ -16,6 +17,7 @@
     <File Path="include/memory.h" />
     <File Path="include/paging.h" />
     <File Path="include/syscall.h" />
+    <File Path="include/test.h" />
     <File Path="include/type.h" />
     <File Path="include/vga.h" />
   </Folder>
@@ -31,6 +33,7 @@
     <File Path="kernel/paging.c" />
     <File Path="kernel/syscall.c" />
     <File Path="kernel/syscall_.asm" />
+    <File Path="kernel/test.c" />
     <File Path="kernel/vga.c" />
   </Folder>
   <Folder Name="/lib/">

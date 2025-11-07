@@ -13,6 +13,9 @@ _start:
     ; Save boot drive number provided by BIOS in DL
     mov [BOOT_DRIVE], dl
 
+    ; Detect Memory
+    call detect_memory
+
     ; Load kernel from disk to memory address 0x10000 (0x1000:0x0000)
     mov ax, 0x1000          ; ES:BX = 0x1000:0x0000 = physical 0x10000
     mov es, ax
@@ -27,12 +30,13 @@ _start:
     jmp $
 
 ; Include necessary modules
-%include "disk.asm"     ; Disk I/O routines
-%include "pmode.asm"    ; Protected mode switching
-%include "gdt32.asm"    ; 32-bit Global Descriptor Table
+%include "disk.asm"         ; Disk I/O routines
+%include "pmode.asm"        ; Protected mode switching
+%include "gdt32.asm"        ; 32-bit Global Descriptor Table
+%include "memory.asm" ; Detect Memory
 
 ; Data section
-BOOT_DRIVE: db 0        ; Storage for boot drive number
+BOOT_DRIVE: db 0            ; Storage for boot drive number
 
 ; =============================================================================
 ; 32-bit Protected Mode Entry Point

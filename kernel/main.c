@@ -5,6 +5,7 @@
 #include "../include/syscall.h"
 #include "../include/memory.h"
 #include "../include/paging.h"
+#include "../include/test.h"
 
 void _kmain() {
 	Init_VGA();
@@ -19,29 +20,12 @@ void _kmain() {
 	OS;
 
 	MemoryInfo();
-	//// تست mapping آدرس‌های مختلف
-	//DEBUGER(LIGHT_CYAN, "Testing page mappings...");
+	
+	// اجرای تست‌های یکپارچگی
+	init_test_suite();
+	run_all_tests();
 
-	//// تست identity mapping
-	//uint64_t test_phys = 0x200000;  // 2MB
-	//uint64_t test_virt = 0x200000;
-
-	//DEBUGER(LIGHT_CYAN, "Identity mapping: VA 0x%x -> PA 0x%x", test_virt, test_phys);
-
-	//// تست kernel higher half mapping
-	//uint64_t kernel_virt = KERNEL_VIRTUAL_BASE + 0x1000;
-	//uint64_t kernel_phys = 0x1000;
-
-	//DEBUGER(LIGHT_CYAN, "Kernel mapping: VA 0x%x -> PA 0x%x", kernel_virt, kernel_phys);
-
-	//// نمایش اطلاعات page table
-	//void* pml4 = get_kernel_page_table();
-	//DEBUGER(LIGHT_CYAN, "Kernel PML4 at: 0x%x", pml4);
-
-	//DEBUGER(LIGHT_GREEN, "Paging test completed");
-
-//	print_memory_info();
-
+	kprintf("\n" SYSTEM_READY_MESSAGE);
 
 	// =============================================================
 	//int number = 10;    

@@ -31,10 +31,16 @@ typedef uint64_t PageTableEntry;
 
 // توابع صفحه‌بندی
 void Init_Paging(void);
+void Complete_Boot_Paging(void);  // تابع جدید برای تکمیل صفحه‌بندی بوت
 void map_page(uint64_t virtual_addr, uint64_t physical_addr, uint64_t flags);
 void unmap_page(uint64_t virtual_addr);
 uint64_t get_physical_address(uint64_t virtual_addr);
 void* get_kernel_page_table(void);
 void enable_paging(void);
+
+// توابع جدید برای یکپارچه‌سازی
+void* get_current_pml4(void);
+void copy_boot_mappings(uint64_t* new_pml4);
+void setup_kernel_mappings(uint64_t* pml4);
 
 #endif
