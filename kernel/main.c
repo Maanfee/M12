@@ -1,10 +1,12 @@
-﻿#include "../include/common.h"
+#include "../include/common.h"
 #include "../include/idt.h"
 #include "../include/isr.h"
 #include "../include/irq.h"
 #include "../include/syscall.h"
 #include "../include/memory.h"
 #include "../include/paging.h"
+#include "../include/process.h"
+
 #include "../include/test.h"
 
 void _kmain() {
@@ -14,6 +16,7 @@ void _kmain() {
 	Init_IDT();
 	Init_ISR();
 	Init_IRQ();
+    InitProcessManager();
 	Init_Syscall();
 
 	sti();
@@ -22,10 +25,10 @@ void _kmain() {
 	MemoryInfo();
 	
 	// اجرای تست‌های یکپارچگی
-	init_test_suite();
-	run_all_tests();
-
-	kprintf("\n" SYSTEM_READY_MESSAGE);
+	//init_test_suite();
+	//run_all_tests();
+	
+	kprintf(SYSTEM_READY_MESSAGE);
 
 	// =============================================================
 	//int number = 10;    

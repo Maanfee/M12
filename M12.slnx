@@ -16,12 +16,17 @@
     <File Path="include/kernel.h" />
     <File Path="include/memory.h" />
     <File Path="include/paging.h" />
+    <File Path="include/pic.h" />
+    <File Path="include/pit.h" />
+    <File Path="include/process.h" />
+    <File Path="include/scheduler.h" />
     <File Path="include/syscall.h" />
     <File Path="include/test.h" />
     <File Path="include/type.h" />
     <File Path="include/vga.h" />
   </Folder>
   <Folder Name="/Kernel/">
+    <File Path="kernel/context_switch_.asm" />
     <File Path="kernel/idt.c" />
     <File Path="kernel/irq.c" />
     <File Path="kernel/irq_.asm" />
@@ -31,6 +36,10 @@
     <File Path="kernel/main.c" />
     <File Path="kernel/memory.c" />
     <File Path="kernel/paging.c" />
+    <File Path="kernel/pic.c" />
+    <File Path="kernel/pit.c" />
+    <File Path="kernel/process.c" />
+    <File Path="kernel/scheduler.c" />
     <File Path="kernel/syscall.c" />
     <File Path="kernel/syscall_.asm" />
     <File Path="kernel/test.c" />

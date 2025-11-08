@@ -1,4 +1,4 @@
-﻿############################################
+############################################
 #					M12 OS		
 ############################################
 
@@ -20,7 +20,7 @@ boot.bin:
 ALLOBJS = $(shell find . -name "*.o" -type f)
 
 SRCS = kernel/main.c kernel/vga.c kernel/idt.c kernel/isr.c kernel/irq.c kernel/syscall.c \
-			kernel/memory.c	kernel/paging.c	kernel/test.c	lib/string.c
+			kernel/memory.c	kernel/paging.c	kernel/test.c kernel/process.c	lib/string.c
 #SRCS = $(shell find . -name "*.c" -type f)
 OBJS = $(SRCS:.c=.o)
 
@@ -28,7 +28,7 @@ OBJS = $(SRCS:.c=.o)
 	@echo "Compiling: $<"
 	$(CC) $(CFLAGS) -o $@ $<
 
-ASMSRCS = kernel/isr_.asm kernel/irq_.asm kernel/syscall_.asm
+ASMSRCS = kernel/isr_.asm kernel/irq_.asm kernel/syscall_.asm kernel/context_switch_.asm
 ASMOBJS = $(ASMSRCS:.asm=.o)
 
 %.o: %.asm
@@ -58,5 +58,5 @@ debug: disk.img
 
 clean:
 	@echo "Cleaning up..."
-	rm -f $(ALLOBJS) *.bin disk.img qemu.log
+	rm -f $(ALLOBJS) *.bin *.elf disk.img qemu.log
 	@echo "Clean completed!"

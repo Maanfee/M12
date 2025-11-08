@@ -1,11 +1,12 @@
-﻿#include "../include/syscall.h"
+#include "../include/syscall.h"
 #include "../include/common.h"
-#include "../include/idt.h"
+#include "../include/vga.h"
+#include "../include/process.h"
 
 // آرایه‌ای از توابع سیستم‌کال
 static uint64_t(*syscall_table[SYSCALL_COUNT])(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
-// Handler اصلی سیستم‌کال - باید global باشد
+// Handler اصلی سیستم‌کال
 uint64_t syscall_handler(uint64_t syscall_num, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
     DEBUGER(LIGHT_CYAN, "Syscall %d called with args: 0x%x, 0x%x, 0x%x",
         syscall_num, arg1, arg2, arg3);
@@ -25,12 +26,6 @@ uint64_t syscall_handler(uint64_t syscall_num, uint64_t arg1, uint64_t arg2, uin
 }
 
 // پیاده‌سازی سیستم‌کال‌های ساده
-static uint64_t sys_exit_handler(uint64_t status, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-    DEBUGER(LIGHT_RED, "Process exit with status: %d", status);
-    // TODO: پیاده‌سازی خروج فرایند
-    return 0;
-}
-
 static uint64_t sys_write_handler(uint64_t fd, uint64_t buffer, uint64_t count, uint64_t arg4, uint64_t arg5) {
     char* str = (char*)buffer;
     for (size_t i = 0; i < count && str[i] != '\0'; i++) {
@@ -39,15 +34,35 @@ static uint64_t sys_write_handler(uint64_t fd, uint64_t buffer, uint64_t count, 
     return count;
 }
 
-static uint64_t sys_getpid_handler(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-    // TODO: برگرداندن PID واقعی
-    return 1;
-}
-
 // سیستم‌کال‌های ساده دیگر
 static uint64_t sys_dummy_handler(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
     DEBUGER(LIGHT_RED, "Dummy syscall called");
     return 0;
+}
+
+// wrapper functions برای تطبیق signature
+static uint64_t sys_fork_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_fork_handler();
+}
+
+static uint64_t sys_exec_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_exec_handler((const char*)arg1, (char* const*)arg2);
+}
+
+static uint64_t sys_exit_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_exit_handler_real((uint32_t)arg1);
+}
+
+static uint64_t sys_wait_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_wait_handler((int*)arg1);
+}
+
+static uint64_t sys_getpid_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_getpid_handler_real();
+}
+
+static uint64_t sys_brk_wrapper(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+    return sys_brk_handler((void*)arg1);
 }
 
 void Init_Syscall(void) {
@@ -57,9 +72,13 @@ void Init_Syscall(void) {
     }
 
     // ثبت سیستم‌کال‌های پیاده‌سازی شده
-    syscall_table[SYS_EXIT] = sys_exit_handler;
+    syscall_table[SYS_EXIT] = sys_exit_wrapper;
     syscall_table[SYS_WRITE] = sys_write_handler;
-    syscall_table[SYS_GETPID] = sys_getpid_handler;
+    syscall_table[SYS_GETPID] = sys_getpid_wrapper;
+    syscall_table[SYS_FORK] = sys_fork_wrapper;
+    syscall_table[SYS_EXEC] = sys_exec_wrapper;
+    syscall_table[SYS_WAIT] = sys_wait_wrapper;
+    syscall_table[SYS_BRK] = sys_brk_wrapper;
 
     // تنظیم MSRهای سیستم‌کال
     uint64_t star_msr = ((uint64_t)0x08 << 32) | ((uint64_t)0x10 << 48);

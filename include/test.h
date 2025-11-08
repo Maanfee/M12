@@ -1,4 +1,4 @@
-﻿#ifndef TEST_H
+#ifndef TEST_H
 #define TEST_H
 
 #include "type.h"
@@ -38,6 +38,9 @@ int test_memory_management(void);
 int test_interrupt_system(void);
 int test_syscall_mechanism(void);
 int test_vga_output(void);
+int test_process_management(void);      
+int test_syscall_functions(void);       
+int test_context_switching(void);        
 
 // گزارش نتایج
 void print_test_results(void);
